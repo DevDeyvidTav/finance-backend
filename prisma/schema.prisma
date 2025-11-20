@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String
+  googleId      String   @unique
+  picture       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  cards         Card[]
+  transactions  Transaction[]
+  incomes       Income[]
+  loans         Loan[]
+  financings    Financing[]
+  insights      FinancialInsight[]
+
+  @@map("users")
+}
+
+model Card {
+  id              String   @id @default(uuid())
+  userId          String
+  name            String
+  lastFourDigits  String?
+  brand           String?
+  limit           Decimal? @db.Decimal(10, 2)
+  closingDay      Int
+  dueDay          Int
+  color           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+
+  @@map("cards")
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Transaction {
+  id              String         @id @default(uuid())
+  userId          String
+  cardId          String?
+  description     String
+  amount          Decimal        @db.Decimal(10, 2)
+  type            TransactionType
+  category        String
+  date            DateTime
+  status          PaymentStatus  @default(PENDING)
+  installments    Int            @default(1)
+  currentInstallment Int         @default(1)
+  isRecurring     Boolean        @default(false)
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card            Card?          @relation(fields: [cardId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
+}
+
+model Income {
+  id              String         @id @default(uuid())
+  userId          String
+  description     String
+  amount          Decimal        @db.Decimal(10, 2)
+  receivedDate    DateTime
+  isRecurring     Boolean        @default(false)
+  category        String         @default("salary")
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("incomes")
+}
+
+model Loan {
+  id              String         @id @default(uuid())
+  userId          String
+  description     String
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  remainingAmount Decimal        @db.Decimal(10, 2)
+  interestRate    Decimal        @db.Decimal(5, 2)
+  installments    Int
+  paidInstallments Int           @default(0)
+  dueDay          Int
+  startDate       DateTime
+  endDate         DateTime
+  status          PaymentStatus  @default(PENDING)
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("loans")
+}
+
+model Financing {
+  id              String         @id @default(uuid())
+  userId          String
+  description     String
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  downPayment     Decimal        @db.Decimal(10, 2)
+  remainingAmount Decimal        @db.Decimal(10, 2)
+  interestRate    Decimal        @db.Decimal(5, 2)
+  installments    Int
+  paidInstallments Int           @default(0)
+  monthlyPayment  Decimal        @db.Decimal(10, 2)
+  dueDay          Int
+  startDate       DateTime
+  endDate         DateTime
+  status          PaymentStatus  @default(PENDING)
+  type            String         // vehicle, property, etc
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("financings")
+}
+
+enum InsightType {
+  WARNING
+  SUCCESS
+  INFO
+  SUGGESTION
+}
+
+model FinancialInsight {
+  id              String       @id @default(uuid())
+  userId          String
+  title           String
+  description     String
+  type            InsightType
+  priority        Int          @default(0)
+  isRead          Boolean      @default(false)
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("financial_insights")
+}
+
+
