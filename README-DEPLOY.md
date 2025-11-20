@@ -67,11 +67,13 @@ NODE_ENV=production
 
 ### 4. Configure o Build
 
-A Vercel detectará automaticamente o `vercel.json`, mas verifique:
+A Vercel detectará automaticamente as configurações:
 
-- **Build Command**: `npm run vercel-build`
-- **Output Directory**: `dist`
+- **Framework Preset**: Other
+- **Build Command**: `npm run vercel-build` (ou deixe em branco)
+- **Output Directory**: Deixe em branco
 - **Install Command**: `npm install`
+- **Root Directory**: Deixe em branco (ou `backend-finance` se estiver em monorepo)
 
 ### 5. Deploy
 

@@ -21,8 +21,18 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  
+  // Para produção na Vercel, não precisa especificar a porta
+  if (process.env.NODE_ENV === 'production') {
+    await app.init();
+    console.log(`🚀 Application initialized for production`);
+  } else {
+    await app.listen(port);
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
+  }
 }
 
 bootstrap();
+
+// Export for Vercel
+export default bootstrap;
