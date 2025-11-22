@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || '*',
     credentials: true,
   });
 
@@ -21,18 +21,8 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 3001;
-  
-  // Para produção na Vercel, não precisa especificar a porta
-  if (process.env.NODE_ENV === 'production') {
-    await app.init();
-    console.log(`🚀 Application initialized for production`);
-  } else {
-    await app.listen(port);
-    console.log(`🚀 Application is running on: http://localhost:${port}`);
-  }
+  await app.listen(port);
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 
 bootstrap();
-
-// Export for Vercel
-export default bootstrap;
